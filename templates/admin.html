@@ -1,0 +1,118 @@
+{% extends "base.html" %}
+{% block title %}Admin Dashboard{% endblock %}
+{% block nav_admin %}active{% endblock %}
+
+{% block content %}
+<h1>Admin Dashboard</h1>
+
+<!-- ============ Applications ============ -->
+<div class="card">
+  <div class="toolbar">
+    <h2>Connection Applications</h2>
+    <form method="get" action="/admin">
+      <select name="app_status" onchange="this.form.submit()">
+        <option value="">All statuses</option>
+        {% for s in app_statuses %}
+        <option value="{{ s }}" {% if s == app_status %}selected{% endif %}>{{ s }}</option>
+        {% endfor %}
+      </select>
+      {% if cmp_status %}<input type="hidden" name="cmp_status" value="{{ cmp_status }}">{% endif %}
+    </form>
+  </div>
+
+  {% if applications %}
+  <table>
+    <thead>
+      <tr><th>#</th><th>Customer</th><th>Contact</th><th>Region</th><th>Plan</th>
+          <th>Status</th><th>Update</th></tr>
+    </thead>
+    <tbody>
+      {% for a in applications %}
+      <tr>
+        <td>{{ a.id }}</td>
+        <td>{{ a.customer_name }}<div class="muted">{{ a.address }}</div></td>
+        <td>{{ a.email }}<div class="muted">{{ a.phone }}</div></td>
+        <td>{{ a.region }}</td>
+        <td>{{ a.plan.value }}</td>
+        <td><span class="pill {{ a.status.value }}">{{ a.status.value }}</span></td>
+        <td>
+          <form class="inline-form" method="post" action="/admin/applications/{{ a.id }}/status">
+            <select name="new_status">
+              {% for s in app_statuses %}
+              <option value="{{ s }}" {% if s == a.status.value %}selected{% endif %}>{{ s }}</option>
+              {% endfor %}
+            </select>
+            <button type="submit">Save</button>
+          </form>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+    <p class="empty">No applications match this filter.</p>
+  {% endif %}
+</div>
+
+<!-- ============ Complaints ============ -->
+<div class="card">
+  <div class="toolbar">
+    <h2>Complaints</h2>
+    <form method="get" action="/admin">
+      <select name="cmp_status" onchange="this.form.submit()">
+        <option value="">All statuses</option>
+        {% for s in cmp_statuses %}
+        <option value="{{ s }}" {% if s == cmp_status %}selected{% endif %}>{{ s.replace('_', ' ') }}</option>
+        {% endfor %}
+      </select>
+      {% if app_status %}<input type="hidden" name="app_status" value="{{ app_status }}">{% endif %}
+    </form>
+  </div>
+
+  {% if complaints %}
+  <table>
+    <thead>
+      <tr><th>#</th><th>App</th><th>Customer</th><th>Subject</th><th>Status</th>
+          <th>Resolve</th></tr>
+    </thead>
+    <tbody>
+      {% for c in complaints %}
+      <tr>
+        <td>{{ c.id }}</td>
+        <td>#{{ c.application_id }}</td>
+        <td>
+          {% set a = app_lookup.get(c.application_id) %}
+          {{ a.customer_name if a else '—' }}
+          <div class="muted">{{ a.phone if a else '' }}</div>
+        </td>
+        <td>
+          <strong>{{ c.subject }}</strong>
+          <div class="muted">{{ c.category.value.replace('_', ' ') }} · {{ c.description }}</div>
+          {% if c.resolution_note %}
+            <div style="margin-top:.35rem;color:#166534;">
+              ✔ {{ c.resolution_note }}
+              <span class="muted">{{ c.resolved_at.strftime('%Y-%m-%d %H:%M UTC') if c.resolved_at }}</span>
+            </div>
+          {% endif %}
+        </td>
+        <td><span class="pill {{ c.status.value }}">{{ c.status.value.replace('_', ' ') }}</span></td>
+        <td>
+          <form class="inline-form" method="post" action="/admin/complaints/{{ c.id }}/resolve">
+            <input name="note" placeholder="Resolution note" required maxlength="1000">
+            <select name="new_status">
+              <option value="resolved" {% if c.status.value == 'resolved' %}selected{% endif %}>resolved</option>
+              <option value="in_progress" {% if c.status.value == 'in_progress' %}selected{% endif %}>in progress</option>
+              <option value="closed" {% if c.status.value == 'closed' %}selected{% endif %}>closed</option>
+            </select>
+            <button type="submit">Save</button>
+          </form>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+    <p class="empty">No complaints match this filter.</p>
+  {% endif %}
+</div>
+{% endblock %}

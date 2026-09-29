@@ -1,0 +1,98 @@
+{% extends "base.html" %}
+{% block title %}Customer Portal{% endblock %}
+{% block nav_customer %}active{% endblock %}
+
+{% block content %}
+<h1>Internet Connection Portal</h1>
+
+<!-- ============ Apply for a new connection ============ -->
+<div class="card">
+  <h2>Apply for a New Connection</h2>
+  <form class="grid" method="post" action="/apply">
+    <input name="customer_name" placeholder="Full name" required maxlength="100">
+    <input name="email" type="email" placeholder="Email" required maxlength="120">
+    <input name="phone" placeholder="Phone" required maxlength="20">
+    <input name="region" placeholder="Region / City" required maxlength="100">
+    <input class="full" name="address" placeholder="Installation address" required maxlength="200">
+    <select name="plan">
+      {% for p in plans %}<option value="{{ p }}">{{ p }}</option>{% endfor %}
+    </select>
+    <button type="submit">Submit Application</button>
+  </form>
+  <p class="muted" style="margin-top:.5rem;">
+    After submitting, note your <strong>Application ID</strong> to track status and file complaints.
+  </p>
+</div>
+
+<!-- ============ Track an application ============ -->
+<div class="card">
+  <h2>Track Your Application</h2>
+  <form method="get" action="/" class="inline-form">
+    <input name="application_id" type="number" min="1" placeholder="Application ID"
+           value="{{ my_application.id if my_application else '' }}" required>
+    <button type="submit">Track</button>
+  </form>
+</div>
+
+{% if my_application %}
+<div class="card">
+  <h2>Application #{{ my_application.id }}</h2>
+  <table>
+    <tr><th>Name</th><td>{{ my_application.customer_name }}</td></tr>
+    <tr><th>Plan</th><td>{{ my_application.plan.value }}</td></tr>
+    <tr><th>Region</th><td>{{ my_application.region }}</td></tr>
+    <tr><th>Address</th><td>{{ my_application.address }}</td></tr>
+    <tr><th>Status</th>
+        <td><span class="pill {{ my_application.status.value }}">{{ my_application.status.value }}</span></td></tr>
+    <tr><th>Submitted</th><td>{{ my_application.created_at.strftime('%Y-%m-%d %H:%M UTC') }}</td></tr>
+  </table>
+</div>
+
+<!-- ============ File a complaint ============ -->
+<div class="card">
+  <h2>File a Complaint</h2>
+  <form class="grid" method="post" action="/complaints">
+    <input type="hidden" name="application_id" value="{{ my_application.id }}">
+    <input class="full" name="subject" placeholder="Subject" required maxlength="150">
+    <select name="category">
+      {% for c in categories %}<option value="{{ c }}">{{ c.replace('_', ' ') }}</option>{% endfor %}
+    </select>
+    <button type="submit">Submit Complaint</button>
+    <textarea class="full" name="description" placeholder="Describe the issue"
+              required maxlength="1000"></textarea>
+  </form>
+</div>
+
+<!-- ============ Complaint history ============ -->
+<div class="card">
+  <h2>Your Complaints</h2>
+  {% if my_complaints %}
+  <table>
+    <thead>
+      <tr><th>#</th><th>Subject</th><th>Category</th><th>Status</th><th>Resolution</th></tr>
+    </thead>
+    <tbody>
+      {% for c in my_complaints %}
+      <tr>
+        <td>{{ c.id }}</td>
+        <td>{{ c.subject }}</td>
+        <td>{{ c.category.value.replace('_', ' ') }}</td>
+        <td><span class="pill {{ c.status.value }}">{{ c.status.value.replace('_', ' ') }}</span></td>
+        <td>
+          {% if c.resolution_note %}
+            {{ c.resolution_note }}
+            <div class="muted">{{ c.resolved_at.strftime('%Y-%m-%d %H:%M UTC') if c.resolved_at }}</div>
+          {% else %}
+            <span class="muted">— awaiting response —</span>
+          {% endif %}
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+    <p class="empty">No complaints filed yet.</p>
+  {% endif %}
+</div>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>{% block title %}ISP Portal{% endblock %}</title>
+<style>
+  :root { --accent: #2563eb; --bg: #f8fafc; --border: #e2e8f0; --muted: #64748b; }
+  * { box-sizing: border-box; }
+  body { font-family: system-ui, -apple-system, sans-serif; margin: 0;
+         background: var(--bg); color: #0f172a; }
+  .wrap { max-width: 1000px; margin: 2rem auto; padding: 0 1rem; }
+  nav { display: flex; gap: 1rem; margin-bottom: 1.25rem; }
+  nav a { color: var(--accent); text-decoration: none; font-weight: 600; font-size: .9rem; }
+  nav a.active { color: #0f172a; }
+  h1 { margin: 0 0 1rem; font-size: 1.5rem; }
+  h2 { margin: 0 0 .75rem; font-size: 1.1rem; }
+  .card { background: #fff; border: 1px solid var(--border); border-radius: 10px;
+          padding: 1rem 1.25rem; margin-bottom: 1.25rem; }
+  form.grid { display: grid; gap: .5rem; grid-template-columns: repeat(2, 1fr); }
+  form.grid .full { grid-column: 1 / -1; }
+  input, select, textarea, button {
+    padding: .55rem .7rem; border: 1px solid var(--border); border-radius: 6px;
+    font-size: .95rem; background: #fff; font-family: inherit;
+  }
+  textarea { resize: vertical; min-height: 60px; }
+  button { background: var(--accent); color: #fff; border: none; cursor: pointer;
+           font-weight: 600; }
+  button:hover { background: #1d4ed8; }
+  button.secondary { background: #e2e8f0; color: #0f172a; }
+  button.secondary:hover { background: #cbd5e1; }
+  table { width: 100%; border-collapse: collapse; font-size: .9rem; }
+  th, td { text-align: left; padding: .55rem .5rem; border-bottom: 1px solid var(--border);
+           vertical-align: top; }
+  th { font-size: .72rem; text-transform: uppercase; letter-spacing: .05em;
+       color: var(--muted); }
+  .pill { display: inline-block; padding: .12rem .55rem; border-radius: 999px;
+          font-size: .72rem; font-weight: 600; text-transform: capitalize;
+          white-space: nowrap; }
+  .pending, .open { background: #fef3c7; color: #92400e; }
+  .approved, .in_progress { background: #dbeafe; color: #1e40af; }
+  .installed, .resolved { background: #dcfce7; color: #166534; }
+  .rejected { background: #fee2e2; color: #991b1b; }
+  .closed { background: #e2e8f0; color: #334155; }
+  .toolbar { display: flex; justify-content: space-between; align-items: center;
+             margin-bottom: .75rem; gap: .5rem; flex-wrap: wrap; }
+  .toolbar form { display: flex; gap: .5rem; align-items: center; }
+  .empty { color: var(--muted); padding: 1rem 0; text-align: center; }
+  .muted { color: var(--muted); font-size: .82rem; }
+  .inline-form { display: flex; gap: .35rem; align-items: center; }
+  .inline-form input, .inline-form select { padding: .35rem .5rem; font-size: .82rem; }
+  .inline-form button { padding: .35rem .65rem; font-size: .82rem; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <nav>
+    <a href="/" class="{% block nav_customer %}{% endblock %}">Customer Portal</a>
+    <a href="/admin" class="{% block nav_admin %}{% endblock %}">Admin Dashboard</a>
+    <a href="/docs" target="_blank">API Docs</a>
+  </nav>
+  {% block content %}{% endblock %}
+</div>
+</body>
+</html>
